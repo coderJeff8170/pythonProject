@@ -1,81 +1,81 @@
 import tkinter as tk
-from tkinter import BOTTOM
+import tkinter.font as font
+from tkinter import *
+import datetime as dt
+from tkinter import ttk
 
 window = tk.Tk()
-main_background = '#ADE8F4'
+
+main_background = '#023e8a'
 button_bgcolor = '#48CAE4'
-font_color = '03045E'
+font_color = 'white'
+timeSentAll = dt.datetime.now()
+timeSentAbsent = dt.datetime.now()
+
+weekOf = dt.datetime.now()
 
 # TODO: fix the icon
 window.iconbitmap(default='img.png')
 window.title('L1 Reminder emails')
 window.geometry('550x350+325+0')
 window.configure(bg=main_background)
+print(window.configure().keys())
 
-title = tk.Label(window, bg=main_background, font=24, text="L1 Interviewer Email Console")
+titleFont = font.Font(family='Arial', weight='bold', size=18)
+labelFont = font.Font(family='Arial', weight='bold', size=12)
+
+title = tk.Label(window, bg=main_background, fg=font_color, font=titleFont, text="L1 Interviewer Coordination Console")
 title.pack(pady=10)
 frame1 = tk.Frame(window).pack()
 frame2 = tk.Frame(window).pack(side=BOTTOM)
 
 
-def incrementHex(hex_str, increment):
-    red = int(hex_str[1:3], 16)
-    green = int(hex_str[3:5], 16)
-    blue = int(hex_str[5:], 16)
-    red += increment
-    green += increment
-    blue += increment
-    new_hex_str = '#' + str(hex(red)[2:]) + str(hex(blue)[2:]) + str(hex(green)[2:])
-    print(new_hex_str)
-    return new_hex_str
-
-
-def fade(start_hex, increment):
-    new_hex = incrementHex(start_hex, increment)
-    title.configure(bg=new_hex)
-    return new_hex;
-    # while new_hex != '#aaaaaa':
-    #     fade(new_hex, increment)
-    #     print(new_hex)
-
-    # window.after(50, lambda: fade(new_hex, increment))
-    # TODO: code to stop it fading?
-
-
-def on_send_absent():
-    print("email sent to L1 interviewers absent from Excel spreadsheet")
-    email_absent_interviewers_result.configure(text='email sent to all L1 interviewers not in spreadsheet')
-    first_hex = '#FFFFFF'
-    i = 50
-    while i > 0:
-        first_hex = fade(first_hex, -1)
-        i -= 1
-    print(hex(11))
+def on_show_and_hide_result(label, message):
+    label.configure(text=message)
+    window.after(4000, lambda: label.configure(text=''))
 
 
 def on_send_all():
-    print("email sent to all L1 interviewers")
-    email_all_interviewers_result.configure(text='email sent to all L1 interviewers')
+    # make variable to hold 'timeSentAll' - if it's less than 24hours than last one, or is empty, don't allow new email sent
+    # else send new email and update the date
+    # if(timeSentAll):
+    on_show_and_hide_result(email_all_interviewers_result, 'email sent to all L1 interviewers')
 
 
-# TODO: I'd like these messages to fade out after like 5 seconds, and perhaps not be able to be resubmitted if same
-#  day... while color is not equal to 0%, subtract 1%;
+def on_send_absent():
+    on_show_and_hide_result(email_absent_interviewers_result, 'email sent to all L1 interviewers not in spreadsheet')
 
 
-email_all_interviewers_label = tk.Label(frame1, bg=main_background, text="Send reminder to all L1 Interviewers")
+def on_add_week():
+    on_show_and_hide_result(add_newWeek_toSpreadsheet_fromTemplate_result, 'new week added to spreadsheet')
+    global weekOf
+    weekOf += dt.timedelta(days=7)
+    label.configure(text=f"{weekOf:%A, %B %d, %Y}")
+
+# TODO: make this more modular
+email_all_interviewers_label = tk.Label(frame1, font=labelFont, bg=main_background, text="Send reminder to all L1 Interviewers")
 email_all_interviewers_button = tk.Button(frame1, text="Send", width=25, bg=button_bgcolor, command=on_send_all)
 email_all_interviewers_result = tk.Label(frame1, bg=main_background, text="")
-
-email_absent_interviewers_label = tk.Label(frame2, bg=main_background, text="Send reminder to absent L1 Interviewers")
-email_absent_interviewers_button = tk.Button(frame2, text="Send", width=25, bg=button_bgcolor, command=on_send_absent)
-email_absent_interviewers_result = tk.Label(frame2, bg=main_background, text="")
-
 email_all_interviewers_label.pack()
 email_all_interviewers_button.pack()
 email_all_interviewers_result.pack()
 
+email_absent_interviewers_label = tk.Label(frame2, font=labelFont, bg=main_background, text="Send reminder to absent L1 Interviewers")
+email_absent_interviewers_button = tk.Button(frame2, text="Send", width=25, bg=button_bgcolor, command=on_send_absent)
+email_absent_interviewers_result = tk.Label(frame2, bg=main_background, text="")
 email_absent_interviewers_label.pack()
 email_absent_interviewers_button.pack()
 email_absent_interviewers_result.pack()
+
+add_newWeek_toSpreadsheet_fromTemplate_label = tk.Label(frame2, font=labelFont, bg=main_background, text="Add new week to spreadsheet")
+add_newWeek_toSpreadsheet_fromTemplate_button = tk.Button(frame2, text="Add Week", width=25, bg=button_bgcolor, command=on_add_week)
+add_newWeek_toSpreadsheet_fromTemplate_result = tk.Label(frame2, bg=main_background, text="")
+add_newWeek_toSpreadsheet_fromTemplate_label.pack()
+add_newWeek_toSpreadsheet_fromTemplate_button.pack()
+add_newWeek_toSpreadsheet_fromTemplate_result.pack()
+
+# label = Label(frame2, text=f"{timeSentAll:%A, %B %d, %Y}", font="Calibri, 20")
+label = Label(frame2, text='', font="Calibri, 20")
+label.pack(pady=20)
 
 window.mainloop()
